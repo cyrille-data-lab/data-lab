@@ -218,3 +218,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# ===== Ajouts projet data-lab =====
+# dbt : fichiers générés
+target/
+dbt_packages/
+logs/
+.user.yml
+
+# dlthub : secrets locaux (ne jamais committer)
+.dlt/secrets.toml
+
+# Databricks Asset Bundles : cache local
+.databricks/
