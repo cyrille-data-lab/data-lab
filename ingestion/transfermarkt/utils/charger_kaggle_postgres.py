@@ -33,7 +33,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 
 # Les 5 fichiers Kaggle retenus pour le projet (décision du 31/10/2026)
-TABLES = ["competitions", "clubs", "players", "player_valuations", "transfers"]
+TABLES = ["competitions", "clubs", "players", "player_valuations", "transfers", "appearances"]
 
 
 def copier_avec_copy(table, conn, keys, data_iter):
