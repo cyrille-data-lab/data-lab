@@ -31,13 +31,15 @@ import dlt
 from dlt.sources.sql_database import sql_database
  
 SOURCE = "transfermarkt"                       # préfixe des tables bronze (convention <source>_<table>)
-TABLES = ["competitions", "clubs", "players", "player_valuations", "transfers", "appearances"]
+TABLES = ["competitions", "clubs", "players", "player_valuations", "transfers", "appearances", "games", "game_events"]
  
 # Tables d'historique chargées en incrémental : table -> (colonne curseur, que faire des lignes sans date)
 INCREMENTAL = {
     "player_valuations": ("date", "raise"),       # date toujours renseignée : une ligne vide = anomalie -> arrêt
     "transfers": ("transfer_date", "include"), 
     "appearances": ("date", "raise"),          # 1 ligne par joueur × match : on ne relit que les nouveaux matchs
+    "games": ("date", "raise"),                # 1 ligne par match
+    "game_events": ("date", "raise"),          # 1 ligne par événement (but, carton, remplacement)
 }
  
 # Types imposés : colonnes que dlthub ne peut pas typer seul (vides à 100 % dans la source, cf. diagnostic 3.7-A)
