@@ -1,0 +1,17 @@
+# Variables du bundle : aucune valeur en dur, tout ce qui change entre dev et prod est ici
+variables:
+  catalog:
+    description: Catalog Unity Catalog cible
+    default: dev
+  secret_scope:
+    description: Secret scope qui contient la clé API-Football
+    default: scope-data-dev
+  planification_cron:
+    description: Heure de lancement du job (format Quartz) - tous les jours à 06:00
+    default: "0 0 6 * * ?"
+  planification_statut:
+    description: PAUSED (planification arrêtée) ou UNPAUSED (active)
+    default: PAUSED
+  duree_alerte_secondes:
+    description: Durée au-delà de laquelle une alerte e-mail est envoyée (1800 s = 30 min)
+    default: 1800
