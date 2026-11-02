@@ -1,0 +1,53 @@
+# Job S2L2B API-Football : initialisation → landing → bronze (1 notebook d'orchestration par tâche)
+resources:
+  jobs:
+    job_api_football_s2l2b:
+      name: JOB - API FOOTBALL - S2L2B
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+
+      # Paramètres du job : transmis automatiquement à toutes les tâches (widgets des notebooks)
+      parameters:
+        - name: CATALOG
+          default: ${var.catalog}
+        - name: SECRET_SCOPE
+          default: ${var.secret_scope}
+        - name: MODE_INIT
+          default: "off"
+
+      # Planification (en pause par défaut)
+      schedule:
+        quartz_cron_expression: ${var.planification_cron}
+        timezone_id: Europe/Paris
+        pause_status: ${var.planification_statut}
+
+      # Alerte si le run dure trop longtemps
+      health:
+        rules:
+          - metric: RUN_DURATION_SECONDS
+            op: GREATER_THAN
+            value: ${var.duree_alerte_secondes}
+      email_notifications:
+        on_failure:
+          - ${workspace.current_user.userName}
+        on_duration_warning_threshold_exceeded:
+          - ${workspace.current_user.userName}
+
+      tasks:
+        # 1. Initialisation (schémas landing/bronze + volumes) : MODE_INIT off = sans effet
+        - task_key: run_api_football_initialisation
+          notebook_task:
+            notebook_path: ../../commun/process/01_initialisation/init_landing_bronze.ipynb
+
+        # 2. Landing : enchaîne les 5 loaders dlthub (fixtures puis top*)
+        - task_key: run_api_football_landing_loads
+          depends_on: [{ task_key: run_api_football_initialisation }]
+          notebook_task:
+            notebook_path: ../process/02_landing/02_orchestration/run_api_football_landing_loads.ipynb
+
+        # 3. Bronze : enchaîne les 5 loaders COPY INTO (pas d'appel API)
+        - task_key: run_api_football_bronze_loads
+          depends_on: [{ task_key: run_api_football_landing_loads }]
+          notebook_task:
+            notebook_path: ../process/03_bronze/02_orchestration/run_api_football_bronze_loads.ipynb

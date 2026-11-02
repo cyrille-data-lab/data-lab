@@ -1,0 +1,17 @@
+# Variables du bundle : aucune valeur en dur, tout ce qui change entre dev et prod est ici
+variables:
+  catalog:
+    description: Catalog Unity Catalog cible
+    default: dev
+  secret_scope:
+    description: Secret scope (Open-Meteo est sans clé, mais les loaders lisent ce widget)
+    default: scope-data-dev
+  planification_cron:
+    description: Heure de lancement (format Quartz) - 07:00, APRÈS le job API-Football (06:00) dont il lit le bronze fixtures
+    default: "0 0 7 * * ?"
+  planification_statut:
+    description: PAUSED (planification arrêtée) ou UNPAUSED (active)
+    default: PAUSED
+  duree_alerte_secondes:
+    description: Durée au-delà de laquelle une alerte e-mail est envoyée (2700 s = 45 min, lots météo longs)
+    default: 270

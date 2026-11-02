@@ -1,0 +1,41 @@
+# Racine du bundle Open-Meteo : nom, fichiers synchronisés, environnements, inclusion des définitions
+bundle:
+  name: open_meteo
+
+# Les notebooks sont dans process/ (dossier parent) et l'initialisation dans ingestion/commun
+sync:
+  paths:
+    - ..
+    - ../../commun
+
+# Calque entreprise : job et variables dans des fichiers séparés
+# (targets ici : l'éditeur de bundle Databricks ne lit les cibles que dans databricks.yml)
+include:
+  - bundle.*.yaml
+
+# Environnements de déploiement
+targets:
+  dev:
+    mode: development        # job préfixé [dev <utilisateur>], planification forcée en pause
+    default: true
+    workspace:
+      host: https://dbc-a54aa7b9-362a.cloud.databricks.com
+
+  # Prod : définie dès maintenant, déployée UNIQUEMENT par sp-data-prod (CI/CD, étape 6)
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-ae320745-d5cd.cloud.databricks.com
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}   # dossier partagé, pas un Home
+    run_as:
+      service_principal_name: 667b1819-fd6b-4c79-80e0-70453c6cf22b          # sp-data-prod (App ID)
+    variables:
+      catalog: prod
+      secret_scope: scope-data-prod
+    permissions:
+      - group_name: grp-data-admins
+        level: CAN_MANAGE
+      - group_name: grp-data-engineers
+        level: CAN_MANAGE_RUN          # lancer / relancer / arrêter les jobs prod (astreinte), sans les modifier
+      - service_principal_name: 667b1819-fd6b-4c79-80e0-70453c6cf22b   # sp-data-prod : la CI/CD pourra reprendre les jobs
+        level: CAN_MANAGE
