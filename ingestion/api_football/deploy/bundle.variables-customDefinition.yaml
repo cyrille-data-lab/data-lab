@@ -14,4 +14,4 @@ variables:
     default: PAUSED
   duree_alerte_secondes:
     description: Durée au-delà de laquelle une alerte e-mail est envoyée (1800 s = 30 min)
-    default: 1800
+    default: 180
