@@ -36,6 +36,6 @@ targets:
       - group_name: grp-data-admins
         level: CAN_MANAGE
       - group_name: grp-data-engineers
-        level: CAN_MANAGE_RUN          # lancer / relancer / arrêter les jobs prod (astreinte), sans les modifier
+        level: CAN_RUN          # lancer / relancer / arrêter les jobs prod (astreinte), sans les modifier
       - service_principal_name: 667b1819-fd6b-4c79-80e0-70453c6cf22b   # sp-data-prod : la CI/CD pourra reprendre les jobs
         level: CAN_MANAGE
