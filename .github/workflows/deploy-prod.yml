@@ -49,6 +49,7 @@ jobs:
           version: 1.23.0                    # même version que l'éditeur de bundle du workspace
 
       - name: Identité utilisée (doit être sp-data-prod)
+        working-directory: ${{ github.workspace }}   # racine du dépôt : hors bundle, donc l'hôte vient de DATABRICKS_HOST (prod)
         run: databricks current-user me --output json | grep -E '"(userName|displayName)"'
 
       - name: Valider le bundle (cible prod)
