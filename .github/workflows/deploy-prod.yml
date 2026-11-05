@@ -1,0 +1,58 @@
+# CI/CD prod : déploie les bundles Databricks en prod, en tant que sp-data-prod,
+# à chaque merge sur main (ou à la main via "Run workflow").
+# Un seul pipeline pour tout le monorepo, une étape (job) par bundle.
+# Garde-fou : approbation manuelle obligatoire (environment GitHub "prod").
+# Un déploiement ne lance AUCUN run : les jobs restent en pause (planification_statut: PAUSED).
+name: Deploy prod (bundles Databricks)
+
+on:
+  push:
+    branches: [main]
+    paths:                                   # ne se déclenche que si un bundle ou ce fichier change
+      - "ingestion/**"
+      - ".github/workflows/deploy-prod.yml"
+  workflow_dispatch:                         # bouton "Run workflow" pour un lancement manuel
+
+permissions:
+  contents: read                             # lecture du dépôt seulement
+
+concurrency:
+  group: deploy-prod                         # un seul déploiement prod à la fois
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ${{ matrix.bundle }}
+    runs-on: ubuntu-latest
+    environment: prod                        # secret + variables + approbation manuelle
+    strategy:
+      fail-fast: false                       # un bundle en échec n'arrête pas les autres
+      matrix:
+        bundle:                              # ajouter une source = ajouter une ligne
+          - ingestion/api_football/deploy
+          - ingestion/open_meteo/deploy
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+      DATABRICKS_AUTH_TYPE: oauth-m2m        # connexion machine à machine (service principal)
+    defaults:
+      run:
+        working-directory: ${{ matrix.bundle }}
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer la CLI Databricks
+        uses: databricks/setup-cli@main
+        with:
+          version: 1.23.0                    # même version que l'éditeur de bundle du workspace
+
+      - name: Identité utilisée (doit être sp-data-prod)
+        run: databricks current-user me --output json | grep -E '"(userName|displayName)"'
+
+      - name: Valider le bundle (cible prod)
+        run: databricks bundle validate -t prod
+
+      - name: Déployer le bundle (cible prod)
+        run: databricks bundle deploy -t prod
