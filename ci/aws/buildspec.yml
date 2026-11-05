@@ -1,0 +1,39 @@
+# CI/CD prod n° 2 (AWS CodeBuild) : mêmes commandes que GitHub Actions.
+# Déploie chaque bundle en prod, en tant que sp-data-prod. Aucun run de job n'est lancé (jobs PAUSED).
+# DATABRICKS_HOST et DATABRICKS_CLIENT_ID : variables du projet CodeBuild (pas en dur ici).
+# Le secret vient de SSM Parameter Store (SecureString), jamais écrit dans le dépôt.
+version: 0.2
+
+env:
+  variables:
+    DATABRICKS_AUTH_TYPE: "oauth-m2m"                 # connexion machine à machine (service principal)
+    DATABRICKS_CLI_VERSION: "1.23.0"                  # même version que GitHub Actions et le workspace
+    BUNDLES: "ingestion/api_football/deploy ingestion/open_meteo/deploy"   # ajouter une source = ajouter un chemin
+  parameter-store:
+    DATABRICKS_CLIENT_SECRET: "/data-lab/prod/databricks-client-secret"
+
+phases:
+  install:
+    commands:
+      # Téléchargement de la CLI Databricks (version fixée) depuis les releases officielles
+      - curl -fsSL -o /tmp/dbcli.zip "https://github.com/databricks/cli/releases/download/v${DATABRICKS_CLI_VERSION}/databricks_cli_${DATABRICKS_CLI_VERSION}_linux_amd64.zip"
+      - unzip -o -q /tmp/dbcli.zip -d /tmp/dbcli
+      - mv /tmp/dbcli/databricks /usr/local/bin/databricks
+      - databricks --version
+
+  pre_build:
+    commands:
+      # Identité utilisée (doit être sp-data-prod) : lancé à la racine, hors dossier bundle
+      - cd "$CODEBUILD_SRC_DIR" && databricks current-user me --output json | grep -E '"(userName|displayName)"'
+
+  build:
+    commands:
+      # Validation puis déploiement de chaque bundle (arrêt au premier échec)
+      - |
+        set -e
+        for b in $BUNDLES; do
+          echo "===== Bundle : $b ====="
+          cd "$CODEBUILD_SRC_DIR/$b"
+          databricks bundle validate -t prod
+          databricks bundle deploy -t prod
+        done
