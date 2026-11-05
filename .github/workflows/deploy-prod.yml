@@ -1,17 +1,14 @@
 # CI/CD prod : déploie les bundles Databricks en prod, en tant que sp-data-prod,
-# à chaque merge sur main (ou à la main via "Run workflow").
+# lancement MANUEL uniquement (la CI/CD automatique active est AWS CodePipeline).
 # Un seul pipeline pour tout le monorepo, une étape (job) par bundle.
 # Garde-fou : approbation manuelle obligatoire (environment GitHub "prod").
 # Un déploiement ne lance AUCUN run : les jobs restent en pause (planification_statut: PAUSED).
 name: Deploy prod (bundles Databricks)
 
 on:
-  push:
-    branches: [main]
-    paths:                                   # ne se déclenche que si un bundle ou ce fichier change
-      - "ingestion/**"
-      - ".github/workflows/deploy-prod.yml"
-  workflow_dispatch:                         # bouton "Run workflow" pour un lancement manuel
+  # Déclencheur automatique désactivé : la CI/CD active est AWS CodePipeline (un seul pipeline à la fois).
+  # Ce workflow reste lançable à la main (onglet Actions › Run workflow) pour comparaison.
+  workflow_dispatch:
 
 permissions:
   contents: read                             # lecture du dépôt seulement
