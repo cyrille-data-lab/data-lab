@@ -1,0 +1,24 @@
+name: 'data_lab'            # nom du projet dbt (pas de tiret)
+version: '1.0.0'
+profile: 'default'          # ignoré par dbt Cloud : la connexion vient de l'environnement
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  data_lab:
+    dwh:
+      +schema: dwh
+      +materialized: view
+    silver:
+      +schema: silver        # prod : <catalog>.silver ; dev : <catalog>.dbt_cgbale_silver
+      +materialized: table
+    gold:
+      +schema: gold          # prod : <catalog>.gold ; dev : <catalog>.dbt_cgbale_gold
+      +materialized: table

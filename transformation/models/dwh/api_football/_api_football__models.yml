@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: dwh_api_football_fixtures
+    description: "Matchs API-Football : colonnes renommées, un match = une ligne (dernière version déposée)."
+    columns:
+      - name: id_match
+        data_tests: [unique, not_null]
