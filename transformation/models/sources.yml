@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: "Données brutes chargées par dlthub (tous les dépôts conservés)."
+    database: "{{ target.database }}"
+    schema: bronze
+    tables:
+      - name: api_football_fixtures    # --- API-Football ---
+        description: "Matchs API-Football (doublons possibles entre dépôts)."
+        columns:
+          - name: fixture__id
+            data_tests: [not_null]
+
+      # --- Transfermarkt (à ajouter quand on fera leurs modèles dwh) ---
+      # - name: transfermarkt_players
+      # - name: transfermarkt_clubs

@@ -13,6 +13,9 @@ clean-targets: ["target", "dbt_packages"]
 
 models:
   data_lab:
+    dwh:
+      +schema: dwh
+      +materialized: view
     silver:
       +schema: silver        # prod : <catalog>.silver ; dev : <catalog>.dbt_cgbale_silver
       +materialized: table
