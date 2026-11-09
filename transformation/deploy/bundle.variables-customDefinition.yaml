@@ -1,0 +1,20 @@
+# Variables du bundle dbt : tout ce qui change entre dev et prod est ici
+variables:
+  catalog:
+    description: Catalog Unity Catalog cible (sources bronze et modèles dbt)
+    default: dev
+  warehouse_id:
+    description: ID du SQL warehouse qui exécute le SQL de dbt
+    default: 110d83b243558cce
+  dbt_schema:
+    description: Schéma de base de dbt (dev = préfixe des schémas, ex. dbt_job_dwh)
+    default: dbt_job
+  dbt_databricks_version:
+    description: Version de l'adaptateur dbt-databricks installée dans le job
+    default: "1.13.0"
+  planification_cron:
+    description: Heure de lancement (format Quartz) - tous les jours à 07:00, après la bronze de 06:00
+    default: "0 0 7 * * ?"
+  planification_statut:
+    description: PAUSED (planification arrêtée) ou UNPAUSED (active)
+    default: PAUSED

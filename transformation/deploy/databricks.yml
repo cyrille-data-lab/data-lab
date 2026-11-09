@@ -1,0 +1,39 @@
+# Racine du bundle dbt : exécute le projet dbt (transformation/) dans un job Databricks
+bundle:
+  name: dbt_data_lab
+
+# Le projet dbt (dbt_project.yml, models/, macros/) est dans le dossier parent
+sync:
+  paths:
+    - ..
+
+# Calque entreprise : job et variables dans des fichiers séparés
+include:
+  - bundle.*.yaml
+
+targets:
+  dev:
+    mode: development        # job préfixé [dev <utilisateur>], planification forcée en pause
+    default: true
+    workspace:
+      host: https://dbc-a54aa7b9-362a.cloud.databricks.com
+
+  # Prod : déployée UNIQUEMENT par sp-data-prod (CI/CD AWS)
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-ae320745-d5cd.cloud.databricks.com
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      service_principal_name: 667b1819-fd6b-4c79-80e0-70453c6cf22b          # sp-data-prod (App ID)
+    variables:
+      catalog: prod
+      warehouse_id: 779acc0ac69b274c
+      dbt_schema: dwh
+    permissions:
+      - group_name: grp-data-admins
+        level: CAN_MANAGE
+      - group_name: grp-data-engineers
+        level: CAN_RUN
+      - service_principal_name: 667b1819-fd6b-4c79-80e0-70453c6cf22b
+        level: CAN_MANAGE

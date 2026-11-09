@@ -1,0 +1,33 @@
+# Job dbt : exécute dbt build sur le projet transformation/ (dwh, puis silver et gold)
+resources:
+  jobs:
+    job_dbt_data_lab:
+      name: JOB - DBT - DATA LAB
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+
+      # Planification (en pause par défaut)
+      schedule:
+        quartz_cron_expression: ${var.planification_cron}
+        timezone_id: Europe/Paris
+        pause_status: ${var.planification_statut}
+
+      # Calcul serverless où s'exécute la commande dbt (le SQL, lui, part sur le warehouse)
+      environments:
+        - environment_key: env_dbt
+          spec:
+            environment_version: "4"
+            dependencies:
+              - dbt-databricks==${var.dbt_databricks_version}
+
+      tasks:
+        - task_key: run_dbt_build
+          environment_key: env_dbt
+          dbt_task:
+            project_directory: ../          # dossier transformation/
+            warehouse_id: ${var.warehouse_id}
+            catalog: ${var.catalog}
+            schema: ${var.dbt_schema}
+            commands:
+              - 'dbt build --vars "{environnement: ${bundle.target}}"'
