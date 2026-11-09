@@ -8,7 +8,7 @@ env:
   variables:
     DATABRICKS_AUTH_TYPE: "oauth-m2m"                 # connexion machine à machine (service principal)
     DATABRICKS_CLI_VERSION: "1.23.0"                  # même version que GitHub Actions et le workspace
-    BUNDLES: "ingestion/api_football/deploy ingestion/open_meteo/deploy"   # ajouter une source = ajouter un chemin
+    BUNDLES: "ingestion/api_football/deploy ingestion/open_meteo/deploy transformation/deploy"   # ajouter une source = ajouter un chemin
   parameter-store:
     DATABRICKS_CLIENT_SECRET: "/data-lab/prod/databricks-client-secret"
 
